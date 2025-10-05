@@ -1,28 +1,43 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Art1kdev</title>
     <style>
+        @font-face {
+            font-family: 'Pusab';
+            src: url('pusab.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background-color: green;
+            background-color: #8d6dd9;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             min-height: 100vh;
+            flex-direction: column;
+            font-family: 'Pusab', sans-serif;
+            color: white;
+            font-size: 48px;
+        }
+
+        .welcome-text {
+            margin-bottom: 20px;
         }
 
         img {
-            margin-top: 20px; /* небольшой отступ сверху */
             max-width: 100%;
             height: auto;
         }
     </style>
 </head>
 <body>
-    <img src="Art1kdev.png" alt="Art1kdev">
+    <div class="welcome-text">Welcome</div>
+    <img src="Art1kdev.png" alt="Art1kdev logo">
 </body>
 </html>
