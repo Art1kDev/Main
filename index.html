@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -23,24 +23,18 @@
             flex-direction: column;
             font-family: 'Pusab', sans-serif;
             color: white;
-            /* Базовый размер шрифта для всего тела, теперь относительный */
             font-size: 5vw; 
         }
 
         .welcome-text {
-            /* 40px из предыдущей версии (48px / 1.2) - теперь 4vw */
             font-size: 4vw; 
             margin-bottom: 2vh; 
         }
 
         img {
-            max-width: 80vw; /* Ограничиваем ширину изображения 80% ширины экрана */
+            max-width: 80vw;
             height: auto;
-            /* Увеличение на 100px заменено на 10vh (10% от высоты viewport) 
-               для адаптивности. Если изображение слишком большое, 
-               можно использовать max-height. */
             min-height: 10vh;
-            /* Использование vh для относительного увеличения высоты */
             height: calc(auto + 10vh); 
         }
     </style>
