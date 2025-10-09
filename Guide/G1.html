@@ -4,14 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Start</title>
-    <link rel="stylesheet" href="style1.css">
+    <style>
+        @font-face {
+            font-family: 'CustomPFont';
+            src: url('P.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            background-image: url('B.png'); 
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center center;
+            background-color: #0140ff;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: block; 
+            text-align: left; 
+        }
+
+        h1, p, .c-text, .right-image {
+            margin-left: 20px; 
+            margin-top: 20px; 
+            display: block; 
+        }
+        
+        h1 {
+            font-family: 'CustomPFont', sans-serif;
+            font-size: 80px;
+            color: white;
+            text-shadow: none;
+            margin-bottom: 15px;
+            letter-spacing: 5px;
+        }
+
+        p a {
+            font-family: 'CustomPFont', sans-serif;
+            color: blue;
+            font-size: 32px;
+            text-decoration: underline;
+            text-shadow: none;
+        }
+
+        p a:hover {
+            color: darkblue;
+            text-decoration: underline;
+        }
+
+        .c-text {
+            font-family: 'CustomPFont', sans-serif;
+            font-size: 40px; 
+            color: white;
+            display: inline-block;
+            margin-right: 10px; 
+        }
+
+        .right-image {
+            width: 50px; 
+            height: auto;
+            display: inline-block;
+            vertical-align: top;
+        }
+    </style>
 </head>
 <body>
-    <div class="sing-background"></div>
-
     <h1>Start</h1>
     
-    <span class="c-text">C</span> 
-    <img src="1.png" alt="Image 1" class="right-image">
+    <p><a href="#">Link Example</a></p> 
+
+    <div>
+        <span class="c-text">C</span> 
+        <img src="1.png" alt="Image 1" class="right-image">
+    </div>
 </body>
 </html>
