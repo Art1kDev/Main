@@ -7,7 +7,7 @@
     <style>
         @font-face {
             font-family: 'CustomRFont';
-            src: url('R.ttf') format('truetype');
+            src: url('r.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -27,13 +27,21 @@
             text-align: center;
         }
 
-        .main-logo-text {
-            font-size: 8vw;
-            margin-bottom: 2vh;
+        .page-logo {
+            max-width: 80%;
+            height: auto;
+            margin: 2vh 0;
+        }
+
+        @media (max-width: 768px) {
+            .page-logo {
+                max-width: 90%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="main-logo-text">Ar7.logo</div>
+    <img src="LogoAR8.png" alt="Ar7 Logo" class="page-logo">
+    <img src="LOGOCGP.png" alt="Main Logo" class="page-logo">
 </body>
 </html>
