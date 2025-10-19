@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Art1kdev</title>
+    <title>Ar7.logo Page</title>
     <style>
         @font-face {
-            font-family: 'Pusab';
-            src: url('pusab.ttf') format('truetype');
+            font-family: 'CustomRFont';
+            src: url('R.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -15,27 +15,29 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #40E0D0;
+            background-color: black;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             flex-direction: column;
-            font-family: 'Pusab', sans-serif;
+            font-family: 'CustomRFont', sans-serif;
             color: white;
             font-size: 5vw; 
+            text-align: center;
         }
 
-        .welcome-text {
-            font-size: 4vw; 
-            margin-bottom: 2vh; 
+        /* Стиль для основного текстового логотипа "Ar7.logo" */
+        .main-logo-text {
+            font-size: 8vw; /* Сделал текст крупнее */
+            margin-bottom: 2vh;
         }
 
-        img {
+        /* Стиль для изображения LOGOCGP.png */
+        .image-logo {
             max-width: 40vw;
             height: auto;
-            min-height: 3vh;
-            height: calc(auto + 10vh); 
+            margin-bottom: 3vh;
         }
 
         .guide-link {
@@ -47,13 +49,15 @@
         }
 
         .guide-link:hover {
-            color: #f0f0f0; 
+            color: #ccc;
         }
     </style>
 </head>
 <body>
-    <div class="welcome-text">Welcome</div>
-    <img src="1Art1kdev.png" alt="Art1kdev logo">
+    <div class="main-logo-text">Ar7.logo</div>
+
+    <img src="LOGOCGP.png" alt="Logo image" class="image-logo">
+
     <a href="Guide/G1.html" class="guide-link">Guide</a>
 </body>
 </html>
