@@ -7,7 +7,7 @@
     <style>
         @font-face {
             font-family: 'CustomRFont';
-            src: url('r.ttf') format('truetype');
+            src: url('R.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -23,25 +23,38 @@
             flex-direction: column;
             font-family: 'CustomRFont', sans-serif;
             color: white;
-            font-size: 5vw; 
+            font-size: 2.5vw;
             text-align: center;
+            position: relative;
         }
 
         .page-logo {
-            max-width: 80%;
+            max-width: 40%;
             height: auto;
-            margin: 2vh 0;
+            margin: 1vh 0;
+            box-sizing: border-box;
+        }
+
+        .ar8-logo {
+            position: absolute;
+            top: 2vh;
+            left: 2vw;
+            max-width: 20%;
+            margin: 0;
         }
 
         @media (max-width: 768px) {
+            body {
+                font-size: 3.5vw;
+            }
             .page-logo {
-                max-width: 90%;
+                max-width: 45%;
             }
         }
     </style>
 </head>
 <body>
-    <img src="LogoAR8.png" alt="Ar7 Logo" class="page-logo">
+    <img src="LogoAR8.png" alt="Ar7 Logo" class="page-logo ar8-logo">
     <img src="LOGOCGP.png" alt="Main Logo" class="page-logo">
 </body>
 </html>
