@@ -42,19 +42,20 @@
             max-width: 20%;
             margin: 0;
         }
-
-        /* Styles for the "Other..." link */
+        
         .other-link {
             position: absolute;
             top: 2vh;
             right: 2vw;
-            /* Inherits font-family, color, and size from body for consistency */
-            text-decoration: none; /* Removes underline from the link */
-            cursor: pointer; /* Ensures it looks clickable */
+            color: white;
+            font-family: 'CustomRFont', sans-serif;
+            font-size: 2.5vw;
+            text-decoration: none;
+            cursor: pointer;
         }
 
         .other-link:hover {
-            color: #ccc; /* Slightly lighter color on hover for feedback */
+            color: #ccc;
         }
 
         @media (max-width: 768px) {
@@ -64,6 +65,9 @@
             .page-logo {
                 max-width: 45%;
             }
+            .other-link {
+                font-size: 3.5vw;
+            }
         }
     </style>
 </head>
