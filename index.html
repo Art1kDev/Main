@@ -1,60 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ar7.logo Page</title>
-    <style>
-        @font-face {
-            font-family: 'CustomRFont';
-            src: url('R.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ar7.logo Page</title>
+    <style>
+        @font-face {
+            font-family: 'CustomRFont';
+            src: url('R.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            flex-direction: column;
-            font-family: 'CustomRFont', sans-serif;
-            color: white;
-            font-size: 2.5vw;
-            text-align: center;
-            position: relative;
-        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            font-family: 'CustomRFont', sans-serif;
+            color: white;
+            font-size: 2.5vw;
+            text-align: center;
+            position: relative;
+        }
 
-        .page-logo {
-            max-width: 40%;
-            height: auto;
-            margin: 1vh 0;
-            box-sizing: border-box;
-        }
+        .page-logo {
+            max-width: 40%;
+            height: auto;
+            margin: 1vh 0;
+            box-sizing: border-box;
+        }
 
-        .ar8-logo {
+        .ar8-logo {
+            position: absolute;
+            top: 2vh;
+            left: 2vw;
+            max-width: 20%;
+            margin: 0;
+        }
+
+        /* Styles for the "Other..." link */
+        .other-link {
             position: absolute;
             top: 2vh;
-            left: 2vw;
-            max-width: 20%;
-            margin: 0;
+            right: 2vw;
+            /* Inherits font-family, color, and size from body for consistency */
+            text-decoration: none; /* Removes underline from the link */
+            cursor: pointer; /* Ensures it looks clickable */
         }
 
-        @media (max-width: 768px) {
-            body {
-                font-size: 3.5vw;
-            }
-            .page-logo {
-                max-width: 45%;
-            }
+        .other-link:hover {
+            color: #ccc; /* Slightly lighter color on hover for feedback */
         }
-    </style>
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 3.5vw;
+            }
+            .page-logo {
+                max-width: 45%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <img src="LogoAR8.png" alt="Ar7 Logo" class="page-logo ar8-logo">
-    <img src="LOGOCGP.png" alt="Main Logo" class="page-logo">
+    <a href="Other.html" class="other-link">Other...</a>
+
+    <img src="LogoAR8.png" alt="Ar7 Logo" class="page-logo ar8-logo">
+    <img src="LOGOCGP.png" alt="Main Logo" class="page-logo">
 </body>
 </html>
