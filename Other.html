@@ -1,442 +1,451 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>ТЕТРИС</title>
-  <style>
-    @font-face {
-      font-family: 'RetroFont';
-      src: url('F.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
+  <meta charset="UTF-8">
+  <title>ТЕТРИС</title>
+  <style>
+    @font-face {
+      font-family: 'RetroFont';
+      src: url('F.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
 
-    body {
-      background: black;
-      color: #0f0;
-      font-family: 'RetroFont', 'Courier New', monospace;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      user-select: none;
-    }
-    
-    #screen-container {
-      width: 800px;
-      height: 600px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: black;
-    }
+    body {
+      background: black;
+      color: #0f0;
+      font-family: 'RetroFont', 'Courier New', monospace;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      user-select: none;
+    }
+    
+    #screen-container {
+      width: 800px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: black;
+    }
 
-    #game, #game-over-menu, #intro {
-      white-space: pre;
-      line-height: 1.2;
-      font-size: 14px;
-      text-align: center;
-      font-family: 'RetroFont', monospace;
-    }
-    .hidden { display: none; }
-    #game-over-menu {
-      border: 1px solid #0f0;
-      padding: 20px;
-      line-height: 1.5;
-    }
-    #level-input {
-      display: inline;
-    }
-  </style>
+    #game, #game-over-menu, #intro {
+      white-space: pre;
+      line-height: 1.2;
+      font-size: 14px;
+      text-align: center;
+      font-family: 'RetroFont', monospace;
+    }
+    .hidden { display: none; }
+    #game-over-menu {
+      border: 1px solid #0f0;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    #level-input {
+      display: inline;
+    }
+  </style>
 </head>
 <body>
-  <div id="screen-container">
-    <pre id="intro" class="hidden">
+  <div id="screen-container">
+    <pre id="intro" class="hidden">
 <br><br><br><br>
-       []
-     ТЕТРИС
-       []
+       []
+     ТЕТРИС
+       []
 <br><br><br><br><br>
 ВАШ УРОВЕНЬ? (0-9) <span id="level-input">_</span>
-    </pre>
-    
-    <div id="game-over-menu" class="hidden">
-      <span style="color:#f00; font-weight:bold;">ИГРА ОКОНЧЕНА</span>
-      <br><br>
-      ВАШ УРОВЕНЬ - <span id="final-level">0</span>
-      <br>
-      ИТОГОВЫЙ СЧЕТ: <span id="final-score">0</span>
-      <br>
-      ВСЕГО ЛИНИЙ: <span id="final-lines">0</span>
-      <br><br>
-      НАЖМИТЕ ПРОБЕЛ ДЛЯ ПЕРЕЗАПУСКА
-    </div>
-    
-    <pre id="game" class="hidden"></pre>
-  </div>
+    </pre>
+    
+    <div id="game-over-menu" class="hidden">
+      <span style="color:#f00; font-weight:bold;">ИГРА ОКОНЧЕНА</span>
+      <br><br>
+      ВАШ УРОВЕНЬ - <span id="final-level">0</span>
+      <br>
+      ИТОГОВЫЙ СЧЕТ: <span id="final-score">0</span>
+      <br>
+      ВСЕГО ЛИНИЙ: <span id="final-lines">0</span>
+      <br><br>
+      НАЖМИТЕ ПРОБЕЛ ДЛЯ ПЕРЕЗАПУСКА
+    </div>
+    
+    <pre id="game" class="hidden"></pre>
+  </div>
 
-  <script>
-    const WIDTH = 10; 
-    const HEIGHT = 20;
+  <script>
+    const WIDTH = 10; 
+    const HEIGHT = 20;
 
-    const TETROMINOES = {
-      'I': [[1, 1, 1, 1]],
-      'O': [[1, 1], [1, 1]],
-      'T': [[0, 1, 0], [1, 1, 1]],
-      'S': [[0, 1, 1], [1, 1, 0]],
-      'Z': [[1, 1, 0], [0, 1, 1]],
-      'J': [[1, 0, 0], [1, 1, 1]],
-      'L': [[0, 0, 1], [1, 1, 1]]
-    };
+    const TETROMINOES = {
+      'I': [[1, 1, 1, 1]],
+      'O': [[1, 1], [1, 1]],
+      'T': [[0, 1, 0], [1, 1, 1]],
+      'S': [[0, 1, 1], [1, 1, 0]],
+      'Z': [[1, 1, 0], [0, 1, 1]],
+      'J': [[1, 0, 0], [1, 1, 1]],
+      'L': [[0, 0, 1], [1, 1, 1]]
+    };
 
-    const FIELD_CELL_OCCUPIED = '[]';
-    const FIELD_CELL_ACTIVE = '[]';
-    const FIELD_CELL_EMPTY = ' .';
-    
-    let gameStartLevel = 0;
+    const FIELD_CELL_OCCUPIED = '[]';
+    const FIELD_CELL_ACTIVE = '[]';
+    const FIELD_CELL_EMPTY = ' .';
+    
+    let gameStartLevel = 0;
+    let controlsVisible = true;
+    let nextPieceVisible = true;
 
-    function createBoard() {
-      return Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
-    }
+    function createBoard() {
+      return Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
+    }
 
-    function newPiece() {
-      const keys = Object.keys(TETROMINOES);
-      const shapeKey = keys[Math.floor(Math.random() * keys.length)];
-      const piece = TETROMINOES[shapeKey];
-      const x = Math.floor(WIDTH / 2 - piece[0].length / 2);
-      const y = 0;
-      return { piece, shapeKey, x, y };
-    }
+    function newPiece() {
+      const keys = Object.keys(TETROMINOES);
+      const shapeKey = keys[Math.floor(Math.random() * keys.length)];
+      const piece = TETROMINOES[shapeKey];
+      const x = Math.floor(WIDTH / 2 - piece[0].length / 2);
+      const y = 0;
+      return { piece, shapeKey, x, y };
+    }
 
-    function checkCollision(board, piece, x, y) {
-      for (let py = 0; py < piece.length; py++) {
-        for (let px = 0; px < piece[py].length; px++) {
-          if (piece[py][px]) {
-            const boardX = x + px;
-            const boardY = y + py;
-            if (boardX < 0 || boardX >= WIDTH || boardY >= HEIGHT || (boardY >= 0 && board[boardY][boardX] !== 0)) {
-              return true;
-            }
-          }
-        }
-      }
-      return false;
-    }
+    function checkCollision(board, piece, x, y) {
+      for (let py = 0; py < piece.length; py++) {
+        for (let px = 0; px < piece[py].length; px++) {
+          if (piece[py][px]) {
+            const boardX = x + px;
+            const boardY = y + py;
+            if (boardX < 0 || boardX >= WIDTH || boardY >= HEIGHT || (boardY >= 0 && board[boardY][boardX] !== 0)) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
 
-    function lockPiece(board, piece, x, y) {
-      for (let py = 0; py < piece.length; py++) {
-        for (let px = 0; px < piece[py].length; px++) {
-          if (piece[py][px]) {
-            if (y + py >= 0) board[y + py][x + px] = 1;
-          }
-        }
-      }
-      return board;
-    }
+    function lockPiece(board, piece, x, y) {
+      for (let py = 0; py < piece.length; py++) {
+        for (let px = 0; px < piece[py].length; px++) {
+          if (piece[py][px]) {
+            if (y + py >= 0) board[y + py][x + px] = 1;
+          }
+        }
+      }
+      return board;
+    }
 
-    function clearLines(board) {
-      const newBoard = board.filter(row => row.some(cell => cell === 0));
-      const linesCleared = HEIGHT - newBoard.length;
-      const score = (linesCleared * 100) * linesCleared;
-      while (newBoard.length < HEIGHT) {
-        newBoard.unshift(Array(WIDTH).fill(0));
-      }
-      return { board: newBoard, score, linesCleared };
-    }
+    function clearLines(board) {
+      const newBoard = board.filter(row => row.some(cell => cell === 0));
+      const linesCleared = HEIGHT - newBoard.length;
+      const score = (linesCleared * 100) * linesCleared;
+      while (newBoard.length < HEIGHT) {
+        newBoard.unshift(Array(WIDTH).fill(0));
+      }
+      return { board: newBoard, score, linesCleared };
+    }
 
-    function rotatePiece(piece) {
-      const rows = piece.length;
-      const cols = piece[0].length;
-      const newPiece = Array(cols).fill().map(() => Array(rows).fill(0));
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          newPiece[x][rows - 1 - y] = piece[y][x];
-        }
-      }
-      return newPiece;
-    }
+    function rotatePiece(piece) {
+      const rows = piece.length;
+      const cols = piece[0].length;
+      const newPiece = Array(cols).fill().map(() => Array(rows).fill(0));
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          newPiece[x][rows - 1 - y] = piece[y][x];
+        }
+      }
+      return newPiece;
+    }
 
-    function drawNextPiece(nextPiece) {
-      const displaySize = 4;
-      let lines = [];
-      const piece = nextPiece.piece;
+    function drawNextPiece(nextPiece) {
+      const displaySize = 4;
+      let lines = [];
+      const piece = nextPiece.piece;
 
-      for (let r = 0; r < displaySize; r++) {
-        let line = "";
-        for (let c = 0; c < displaySize; c++) {
-          if (r < piece.length && c < piece[r].length && piece[r][c]) {
-            line += FIELD_CELL_ACTIVE;
-          } else {
-            line += FIELD_CELL_EMPTY;
-          }
-        }
-        lines.push(line);
-      }
-      return lines;
-    }
+      for (let r = 0; r < displaySize; r++) {
+        let line = "";
+        for (let c = 0; c < displaySize; c++) {
+          if (r < piece.length && c < piece[r].length && piece[r][c]) {
+            line += FIELD_CELL_ACTIVE;
+          } else {
+            line += FIELD_CELL_EMPTY;
+          }
+        }
+        lines.push(line);
+      }
+      return lines;
+    }
 
-    function drawBoard(board, piece, x, y, score, totalLinesCleared, nextPiece) {
-      const level = Math.floor(totalLinesCleared / 10) + 1;
-      const tempBoard = board.map(row => [...row]);
+    function drawBoard(board, piece, x, y, score, totalLinesCleared, nextPiece) {
+      const level = Math.floor(totalLinesCleared / 10) + 1;
+      const tempBoard = board.map(row => [...row]);
 
-      for (let py = 0; py < piece.length; py++) {
-        for (let px = 0; px < piece[py].length; px++) {
-          if (piece[py][px]) {
-            const boardY = y + py;
-            const boardX = x + px;
-            if (boardY >= 0 && boardY < HEIGHT && boardX >= 0 && boardX < WIDTH) {
-              tempBoard[boardY][boardX] = 2;
-            }
-          }
-        }
-      }
+      for (let py = 0; py < piece.length; py++) {
+        for (let px = 0; px < piece[py].length; px++) {
+          if (piece[py][px]) {
+            const boardY = y + py;
+            const boardX = x + px;
+            if (boardY >= 0 && boardY < HEIGHT && boardX >= 0 && boardX < WIDTH) {
+              tempBoard[boardY][boardX] = 2;
+            }
+          }
+        }
+      }
 
-      const nextPieceArt = drawNextPiece(nextPiece);
-      const nextPieceTitle = " СЛЕДУЮЩАЯ:";
+      const nextPieceArt = nextPieceVisible ? drawNextPiece(nextPiece) : [" . . . .", " . . . .", " . . . .", " . . . ."];
+      const nextPieceTitle = nextPieceVisible ? " СЛЕДУЮЩАЯ:" : "           ";
 
-      const leftPanel = [
-        `ПОЛНЫХ СТРОК: ${totalLinesCleared}`,
-        `УРОВЕНЬ: ${level}`,
-        `СЧЕТ: ${score}`,
-      ];
+      const leftPanel = [
+        `ПОЛНЫХ СТРОК: ${totalLinesCleared}`,
+        `УРОВЕНЬ: ${level}`,
+        `СЧЕТ: ${score}`,
+      ];
 
-      const rightPanel = [
-        "7: НАЛЕВО 9: НАПРАВО",
-        "8: ПОВОРОТ",
-        "",
-        "4: УСКОРИТЬ 5: СБРОСИТЬ",
-        "1: ПОКАЗАТЬ СЛЕДУЮЩУЮ",
-        "0: СТЕРЕТЬ ЭТОТ ТЕКСТ",
-        "ПРОБЕЛ - СБРОСИТЬ",
-      ];
-      
-      while (leftPanel.length < HEIGHT) {
-        leftPanel.push("");
-      }
+      const rightPanelInstructions = [
+        "7: НАЛЕВО 9: НАПРАВО",
+        "8: ПОВОРОТ",
+        "",
+        "4: УСКОРИТЬ 5: СБРОСИТЬ",
+        "1: ПОКАЗАТЬ СЛЕДУЮЩУЮ",
+        "0: СТЕРЕТЬ ЭТОТ ТЕКСТ",
+        "ПРОБЕЛ - СБРОСИТЬ",
+      ];
+      const rightPanel = controlsVisible ? rightPanelInstructions : rightPanelInstructions.map(() => "");
+      
+      while (leftPanel.length < HEIGHT) {
+        leftPanel.push("");
+      }
 
-      leftPanel[3] = nextPieceTitle;
-      for (let i = 0; i < nextPieceArt.length; i++) {
-        leftPanel[4 + i] = "  " + nextPieceArt[i]; 
-      }
-      
-      const panelWidth = 25;
-      let output = [];
+      leftPanel[3] = nextPieceTitle;
+      for (let i = 0; i < nextPieceArt.length; i++) {
+        leftPanel[4 + i] = "  " + nextPieceArt[i]; 
+      }
+      
+      const panelWidth = 25;
+      let output = [];
 
-      for (let i = 0; i < HEIGHT; i++) {
-        const leftText = leftPanel[i] || "";
-        const rightText = i < rightPanel.length ? rightPanel[i] : "";
-        let boardLine = "   <!";
+      for (let i = 0; i < HEIGHT; i++) {
+        const leftText = leftPanel[i] || "";
+        const rightText = i < rightPanel.length ? rightPanel[i] : "";
+        let boardLine = "   <!";
 
-        for (let cell of tempBoard[i]) {
-          if (cell === 1) boardLine += FIELD_CELL_OCCUPIED;
-          else if (cell === 2) boardLine += FIELD_CELL_ACTIVE;
-          else boardLine += FIELD_CELL_EMPTY;
-        }
-        boardLine += "!>";
-        output.push(`${leftText.padEnd(panelWidth)}${boardLine}${rightText}`);
-      }
+        for (let cell of tempBoard[i]) {
+          if (cell === 1) boardLine += FIELD_CELL_OCCUPIED;
+          else if (cell === 2) boardLine += FIELD_CELL_ACTIVE;
+          else boardLine += FIELD_CELL_EMPTY;
+        }
+        boardLine += "!>";
+        output.push(`${leftText.padEnd(panelWidth)}${boardLine}${rightText}`);
+      }
 
-      const bottomBorderLen = FIELD_CELL_EMPTY.length * WIDTH + 1;
-      const bottomBorder1 = "   <!" + "=".repeat(bottomBorderLen) + "!>";
-      const bottomBorder2 = "     " + "\\/\\/".repeat(Math.floor(WIDTH / 2)) + (WIDTH % 2 ? "\\/" : "");
+      const bottomBorderLen = FIELD_CELL_EMPTY.length * WIDTH + 1;
+      const bottomBorder1 = "   <!" + "=".repeat(bottomBorderLen) + "!>";
+      const bottomBorder2 = "     " + "\\/\\/".repeat(Math.floor(WIDTH / 2)) + (WIDTH % 2 ? "\\/" : "");
 
-      output.push(" ".repeat(panelWidth) + bottomBorder1);
-      output.push(" ".repeat(panelWidth) + bottomBorder2);
+      output.push(" ".repeat(panelWidth) + bottomBorder1);
+      output.push(" ".repeat(panelWidth) + bottomBorder2);
 
-      document.getElementById('game').textContent = output.join('\n');
-    }
+      document.getElementById('game').textContent = output.join('\n');
+    }
 
-    let lastKey = null;
-    document.addEventListener('keydown', (e) => {
-      const key = e.key;
-      const isDigit = key >= '0' && key <= '9';
-      const isSpace = key === ' ';
-      
-      const introEl = document.getElementById('intro');
-      const menuEl = document.getElementById('game-over-menu');
-      const isMenuVisible = !menuEl.classList.contains('hidden');
-      const isIntroVisible = !introEl.classList.contains('hidden');
+    let lastKey = null;
+    document.addEventListener('keydown', (e) => {
+      const key = e.key;
+      const isDigit = key >= '0' && key <= '9';
+      const isSpace = key === ' ';
+      
+      const introEl = document.getElementById('intro');
+      const menuEl = document.getElementById('game-over-menu');
+      const isMenuVisible = !menuEl.classList.contains('hidden');
+      const isIntroVisible = !introEl.classList.contains('hidden');
 
-      if (isIntroVisible && isDigit) {
-        const level = parseInt(key);
-        if (level >= 0 && level <= 9) {
-          gameStartLevel = level;
-          introEl.classList.add('hidden');
-          main(level);
-          e.preventDefault();
-        }
-      }
-      
-      if (isMenuVisible && isSpace) {
-        menuEl.classList.add('hidden');
-        introEl.classList.remove('hidden');
-        document.getElementById('level-input').textContent = '_';
-        e.preventDefault();
-      }
+      if (isIntroVisible && isDigit) {
+        const level = parseInt(key);
+        if (level >= 0 && level <= 9) {
+          gameStartLevel = level;
+          introEl.classList.add('hidden');
+          main(level);
+          e.preventDefault();
+        }
+      }
+      
+      if (isMenuVisible && isSpace) {
+        menuEl.classList.add('hidden');
+        introEl.classList.remove('hidden');
+        document.getElementById('level-input').textContent = '_';
+        e.preventDefault();
+      }
 
-      if (['7', '9', '8', '4', '5', '0', ' ', '1'].includes(key)) {
-        lastKey = key;
-        e.preventDefault();
-      }
-    });
+      if (['7', '9', '8', '4', '5', '0', ' ', '1'].includes(key)) {
+        lastKey = key;
+        e.preventDefault();
+      }
+    });
 
-    function getInputValid() {
-      const key = lastKey;
-      lastKey = null;
-      if (key === '7') return 'left';
-      if (key === '9') return 'right';
-      if (key === '8') return 'rotate';
-      if (key === '4') return 'down';
-      if (key === '5' || key === ' ') return 'drop';
-      return null;
-    }
+    function getInputValid() {
+      const key = lastKey;
+      lastKey = null;
+      if (key === '7') return 'left';
+      if (key === '9') return 'right';
+      if (key === '8') return 'rotate';
+      if (key === '4') return 'down';
+      if (key === '5' || key === ' ') return 'drop';
+      if (key === '0') return '0';
+      if (key === '1') return '1';
+      return null;
+    }
 
-    function showIntroScreen() {
-      document.getElementById('game').classList.add('hidden');
-      document.getElementById('game-over-menu').classList.add('hidden');
-      document.getElementById('intro').classList.remove('hidden');
-    }
+    function showIntroScreen() {
+      document.getElementById('game').classList.add('hidden');
+      document.getElementById('game-over-menu').classList.add('hidden');
+      document.getElementById('intro').classList.remove('hidden');
+    }
 
-    function fadeInBoard(board, piece, x, y, score, totalLinesCleared, nextPiece) {
-      const totalCells = WIDTH * HEIGHT;
-      const duration = 1000;
-      const startTime = Date.now();
-      const gameEl = document.getElementById('game');
-      gameEl.classList.remove('hidden');
+    function fadeInBoard(board, piece, x, y, score, totalLinesCleared, nextPiece) {
+      const totalCells = WIDTH * HEIGHT;
+      const duration = 1000;
+      const startTime = Date.now();
+      const gameEl = document.getElementById('game');
+      gameEl.classList.remove('hidden');
 
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(1, elapsed / duration);
-        const targetCells = Math.floor(totalCells * progress);
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const targetCells = Math.floor(totalCells * progress);
 
-        const currentBoard = createBoard();
-        let filled = 0;
-        for (let r = 0; r < HEIGHT && filled < targetCells; r++) {
-          for (let c = 0; c < WIDTH && filled < targetCells; c++) {
-            currentBoard[r][c] = 1;
-            filled++;
-          }
-        }
+        const currentBoard = createBoard();
+        let filled = 0;
+        for (let r = 0; r < HEIGHT && filled < targetCells; r++) {
+          for (let c = 0; c < WIDTH && filled < targetCells; c++) {
+            currentBoard[r][c] = 1;
+            filled++;
+          }
+        }
 
-        drawBoard(currentBoard, piece, x, y, score, totalLinesCleared, nextPiece);
-        if (elapsed >= duration) {
-          clearInterval(interval);
-        }
-      }, 10);
-    }
+        drawBoard(currentBoard, piece, x, y, score, totalLinesCleared, nextPiece);
+        if (elapsed >= duration) {
+          clearInterval(interval);
+        }
+      }, 10);
+    }
 
-    let gameRunning = false;
-    let board, current, next, score, totalLinesCleared, fallTime, lastTime, gameLoopId;
+    let gameRunning = false;
+    let board, current, next, score, totalLinesCleared, fallTime, lastTime, gameLoopId;
 
-    function main(startLevel) {
-      board = createBoard();
-      current = newPiece();
-      next = newPiece();
-      score = 0;
-      totalLinesCleared = startLevel * 10;
-      fallTime = 0;
-      lastTime = Date.now();
-      gameRunning = true;
+    function main(startLevel) {
+      board = createBoard();
+      current = newPiece();
+      next = newPiece();
+      score = 0;
+      totalLinesCleared = startLevel * 10;
+      fallTime = 0;
+      lastTime = Date.now();
+      gameRunning = true;
 
-      fadeInBoard(board, current.piece, current.x, current.y, score, totalLinesCleared, next);
-      setTimeout(() => {
-        gameLoop();
-      }, 1100);
-    }
+      fadeInBoard(board, current.piece, current.x, current.y, score, totalLinesCleared, next);
+      setTimeout(() => {
+        gameLoop();
+      }, 1100);
+    }
 
-    function gameLoop() {
-      if (!gameRunning) return;
+    function gameLoop() {
+      if (!gameRunning) return;
 
-      const now = Date.now();
-      const deltaTime = (now - lastTime) / 1000;
-      lastTime = now;
-      fallTime += deltaTime;
+      const now = Date.now();
+      const deltaTime = (now - lastTime) / 1000;
+      lastTime = now;
+      fallTime += deltaTime;
 
-      const level = Math.floor(totalLinesCleared / 10) + 1;
-      let baseFallSpeed = Math.max(0.1, 0.5 - (level - 1) * 0.04);
-      let currentFallSpeed = baseFallSpeed;
+      const level = Math.floor(totalLinesCleared / 10) + 1;
+      let baseFallSpeed = Math.max(0.1, 0.5 - (level - 1) * 0.04);
+      let currentFallSpeed = baseFallSpeed;
 
-      const key = getInputValid();
+      const key = getInputValid();
 
-      if (key === 'left') {
-        if (!checkCollision(board, current.piece, current.x - 1, current.y)) {
-          current.x -= 1;
-        }
-      } else if (key === 'right') {
-        if (!checkCollision(board, current.piece, current.x + 1, current.y)) {
-          current.x += 1;
-        }
-      } else if (key === 'rotate') {
-        const rotated = rotatePiece(current.piece);
-        if (!checkCollision(board, rotated, current.x, current.y)) {
-          current.piece = rotated;
-        } else if (!checkCollision(board, rotated, current.x + 1, current.y)) {
-          current.piece = rotated;
-          current.x += 1;
-        } else if (!checkCollision(board, rotated, current.x - 1, current.y)) {
-          current.piece = rotated;
-          current.x -= 1;
-        }
-      } else if (key === 'drop') {
-        while (!checkCollision(board, current.piece, current.x, current.y + 1)) {
-          current.y += 1;
-        }
-        fallTime = baseFallSpeed;
-      }
+      if (key === 'left') {
+        if (!checkCollision(board, current.piece, current.x - 1, current.y)) {
+          current.x -= 1;
+        }
+      } else if (key === 'right') {
+        if (!checkCollision(board, current.piece, current.x + 1, current.y)) {
+          current.x += 1;
+        }
+      } else if (key === 'rotate') {
+        const rotated = rotatePiece(current.piece);
+        if (!checkCollision(board, rotated, current.x, current.y)) {
+          current.piece = rotated;
+        } else if (!checkCollision(board, rotated, current.x + 1, current.y)) {
+          current.piece = rotated;
+          current.x += 1;
+        } else if (!checkCollision(board, rotated, current.x - 1, current.y)) {
+          current.piece = rotated;
+          current.x -= 1;
+        }
+      } else if (key === 'drop') {
+        while (!checkCollision(board, current.piece, current.x, current.y + 1)) {
+          current.y += 1;
+        }
+        fallTime = baseFallSpeed;
+      } else if (key === '0') {
+        controlsVisible = !controlsVisible;
+      } else if (key === '1') {
+        nextPieceVisible = !nextPieceVisible;
+      }
 
-      if (key === 'down') {
-        currentFallSpeed = 0.05;
-      }
+      if (key === 'down') {
+        currentFallSpeed = 0.05;
+      }
 
-      if (fallTime >= currentFallSpeed) {
-        fallTime = 0;
-        if (!checkCollision(board, current.piece, current.x, current.y + 1)) {
-          current.y += 1;
-        } else {
-          board = lockPiece(board, current.piece, current.x, current.y);
-          const result = clearLines(board);
-          board = result.board;
-          score += result.score;
-          totalLinesCleared += result.linesCleared;
+      if (fallTime >= currentFallSpeed) {
+        fallTime = 0;
+        if (!checkCollision(board, current.piece, current.x, current.y + 1)) {
+          current.y += 1;
+        } else {
+          board = lockPiece(board, current.piece, current.x, current.y);
+          const result = clearLines(board);
+          board = result.board;
+          score += result.score;
+          totalLinesCleared += result.linesCleared;
 
-          current = next;
-          current.x = Math.floor(WIDTH / 2 - current.piece[0].length / 2);
-          current.y = 0;
-          next = newPiece();
+          current = next;
+          current.x = Math.floor(WIDTH / 2 - current.piece[0].length / 2);
+          current.y = 0;
+          next = newPiece();
 
-          if (checkCollision(board, current.piece, current.x, current.y)) {
-            endGame();
-            return;
-          }
-        }
-      }
+          if (checkCollision(board, current.piece, current.x, current.y)) {
+            endGame();
+            return;
+          }
+        }
+      }
 
-      drawBoard(board, current.piece, current.x, current.y, score, totalLinesCleared, next);
-      gameLoopId = requestAnimationFrame(gameLoop);
-    }
+      drawBoard(board, current.piece, current.x, current.y, score, totalLinesCleared, next);
+      gameLoopId = requestAnimationFrame(gameLoop);
+    }
 
-    function endGame() {
-      gameRunning = false;
-      if (gameLoopId) cancelAnimationFrame(gameLoopId);
-      
-      document.getElementById('game').classList.add('hidden');
-      const menuEl = document.getElementById('game-over-menu');
-      
-      const gameLevel = Math.floor(totalLinesCleared / 10) + 1;
-      const finalLevel = Math.min(9, gameLevel) - 1;
-      
-      document.getElementById('final-level').textContent = finalLevel; 
-      document.getElementById('final-score').textContent = score;
-      document.getElementById('final-lines').textContent = totalLinesCleared;
-      
-      menuEl.classList.remove('hidden');
-    }
+    function endGame() {
+      gameRunning = false;
+      if (gameLoopId) cancelAnimationFrame(gameLoopId);
+      
+      document.getElementById('game').classList.add('hidden');
+      const menuEl = document.getElementById('game-over-menu');
+      
+      const gameLevel = Math.floor(totalLinesCleared / 10) + 1;
+      const finalLevel = Math.min(9, gameLevel) - 1;
+      
+      document.getElementById('final-level').textContent = finalLevel; 
+      document.getElementById('final-score').textContent = score;
+      document.getElementById('final-lines').textContent = totalLinesCleared;
+      
+      menuEl.classList.remove('hidden');
+    }
 
-    window.addEventListener('load', showIntroScreen);
-  </script>
+    window.addEventListener('load', showIntroScreen);
+  </script>
 </body>
 </html>
