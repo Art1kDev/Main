@@ -43,12 +43,6 @@
       font-family: 'RetroFont', monospace;
     }
     .hidden { display: none; }
-    #game-over-menu {
-      border: 1px solid #f00;
-      color: #f00;
-      padding: 20px;
-      line-height: 1.5;
-    }
     #level-input {
       display: inline;
     }
@@ -64,16 +58,6 @@
 <br><br><br><br><br>
 ВАШ УРОВЕНЬ? (0-9) <span id="level-input">_</span>
     </pre>
-    
-    <div id="game-over-menu" class="hidden">
-      <span style="color:#f00; font-weight:bold;">ИГРА ОКОНЧЕНА</span>
-      <br><br>
-      ИТОГОВЫЙ СЧЕТ: <span id="final-score">0</span>
-      <br>
-      ВСЕГО ЛИНИЙ: <span id="final-lines">0</span>
-      <br><br>
-      НАЖМИТЕ ПРОБЕЛ ДЛЯ ПЕРЕЗАПУСКА
-    </div>
     
     <pre id="game" class="hidden"></pre>
   </div>
@@ -180,7 +164,7 @@
       return lines;
     }
 
-    function drawBoard(board, piece, x, y, score, totalLinesCleared, nextPiece) {
+    function drawBoardCustom(board, piece, x, y, score, totalLinesCleared, nextPiece) {
       const currentLevel = Math.floor(totalLinesCleared / 10) + gameStartLevel;
       const tempBoard = board.map(row => [...row]);
 
@@ -204,37 +188,47 @@
       leftPanel.push(`ПОЛНЫХ СТРОК: ${totalLinesCleared}`.padEnd(LEFT_PANEL_WIDTH, ' '));
       leftPanel.push(`УРОВЕНЬ: ${currentLevel}`.padEnd(LEFT_PANEL_WIDTH, ' '));
       leftPanel.push(`СЧЕТ: ${score}`.padEnd(LEFT_PANEL_WIDTH, ' '));
-      leftPanel.push(" ".padEnd(LEFT_PANEL_WIDTH, ' '));
       
-      leftPanel.push("СЛЕДУЮЩАЯ ФИГУРА:".padEnd(LEFT_PANEL_WIDTH, ' '));
-      leftPanel.push(" ".padEnd(LEFT_PANEL_WIDTH, ' '));
-      for (let line of nextPieceLines) {
-        const paddedLine = " ".repeat(4) + line; 
-        leftPanel.push(paddedLine.padEnd(LEFT_PANEL_WIDTH, ' '));
+      const nextPieceStartLine = 5; 
+      while (leftPanel.length < nextPieceStartLine) {
+          leftPanel.push(" ".repeat(LEFT_PANEL_WIDTH));
       }
-      leftPanel.push(" ".padEnd(LEFT_PANEL_WIDTH, ' '));
+      
+      if (showNextPieceToggle) {
+          for (let i = 0; i < nextPieceLines.length; i++) {
+              if (leftPanel.length < HEIGHT) {
+                  const padding = Math.floor((LEFT_PANEL_WIDTH - nextPieceLines[i].length) / 2);
+                  const paddedLine = nextPieceLines[i].padStart(padding + nextPieceLines[i].length, ' ');
+                  leftPanel.push(paddedLine.padEnd(LEFT_PANEL_WIDTH, ' '));
+              }
+          }
+      }
 
       while (leftPanel.length < HEIGHT) {
           leftPanel.push(" ".repeat(LEFT_PANEL_WIDTH));
       }
 
-      const RIGHT_PANEL_WIDTH = 25;
-      const rightPanel = [
-          "7: НАЛЕВО 9: НАПРАВО".padEnd(RIGHT_PANEL_WIDTH, ' '),
-          "8:ПОВОРОТ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-          "4:УСКОРИТЬ 5:СБРОСИТЬ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-          "1: ПОКАЗАТЬ СЛЕДУЮЩУЮ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-          "0: СТЕРЕТЬ ЭТОТ ТЕКСТ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-          "ПРОБЕЛ - СБРОСИТЬ".padEnd(RIGHT_PANEL_WIDTH, ' '),
+      const RIGHT_PANEL_WIDTH = 35;
+      let rightPanel = [];
+
+      const controls = [
+          "7: НАЛЕВО 9: НАПРАВО",
+          "8:ПОВОРОТ",
+          "4:УСКОРИТЬ 5:СБРОСИТЬ",
+          "1: ПОКАЗАТЬ СЛЕДУЮЩУЮ",
+          "0: СТЕРЕТЬ ЭТОТ ТЕКСТ",
+          "ПРОБЕЛ - СБРОСИТЬ",
       ];
+
+      for (let i = 0; i < controls.length; i++) {
+          rightPanel.push(showControlsToggle ? controls[i].padEnd(RIGHT_PANEL_WIDTH, ' ') : " ".repeat(RIGHT_PANEL_WIDTH));
+      }
 
       while (rightPanel.length < HEIGHT) {
           rightPanel.push(" ".repeat(RIGHT_PANEL_WIDTH));
       }
 
-
       const topHeader = ""; 
-
       let output = [];
       
       if (topHeader.length > 0) {
@@ -298,8 +292,10 @@
       if (gameRunning) {
         if (key === '1') {
             showNextPieceToggle = !showNextPieceToggle;
+            drawBoardCustom(board, current.piece, current.x, current.y, score, totalLinesCleared, next);
         } else if (key === '0') {
             showControlsToggle = !showControlsToggle;
+            drawBoardCustom(board, current.piece, current.x, current.y, score, totalLinesCleared, next);
         }
       }
       
@@ -322,7 +318,6 @@
 
     function showIntroScreen() {
       document.getElementById('game').classList.add('hidden');
-      document.getElementById('game-over-menu').classList.add('hidden');
       document.getElementById('intro').classList.remove('hidden');
       if (gameLoopId) cancelAnimationFrame(gameLoopId);
       gameRunning = false;
@@ -354,7 +349,7 @@
           }
         }
 
-        drawBoard(currentBoard, piece, x, y, score, totalLinesCleared, nextPiece);
+        drawBoardCustom(currentBoard, piece, x, y, score, totalLinesCleared, nextPiece);
         if (elapsed >= duration) {
           clearInterval(interval);
         }
@@ -462,101 +457,8 @@
       showIntroScreen();
     }
 
-    // Специальная функция для учета смены отображения (1 и 0)
-    function drawBoardCustom(board, piece, x, y, score, totalLinesCleared, nextPiece) {
-        const currentLevel = Math.floor(totalLinesCleared / 10) + gameStartLevel;
-        const tempBoard = board.map(row => [...row]);
-
-        for (let py = 0; py < piece.length; py++) {
-            for (let px = 0; px < piece[py].length; px++) {
-                if (piece[py][px]) {
-                    const boardY = y + py;
-                    const boardX = x + px;
-                    if (boardY >= 0 && boardY < HEIGHT && boardX >= 0 && boardX < WIDTH) {
-                        tempBoard[boardY][boardX] = 2;
-                    }
-                }
-            }
-        }
-
-        const nextPieceLines = drawNextPiece(nextPiece);
-        
-        const LEFT_PANEL_WIDTH = 25; 
-        let leftPanel = [];
-        
-        leftPanel.push(`ПОЛНЫХ СТРОК: ${totalLinesCleared}`.padEnd(LEFT_PANEL_WIDTH, ' '));
-        leftPanel.push(`УРОВЕНЬ: ${currentLevel}`.padEnd(LEFT_PANEL_WIDTH, ' '));
-        leftPanel.push(`СЧЕТ: ${score}`.padEnd(LEFT_PANEL_WIDTH, ' '));
-        leftPanel.push(" ".padEnd(LEFT_PANEL_WIDTH, ' '));
-        
-        // Отображение следующей фигуры, если не скрыта
-        if (showNextPieceToggle) {
-            leftPanel.push("СЛЕДУЮЩАЯ ФИГУРА:".padEnd(LEFT_PANEL_WIDTH, ' '));
-            leftPanel.push(" ".padEnd(LEFT_PANEL_WIDTH, ' '));
-            for (let line of nextPieceLines) {
-                const paddedLine = " ".repeat(4) + line; 
-                leftPanel.push(paddedLine.padEnd(LEFT_PANEL_WIDTH, ' '));
-            }
-            leftPanel.push(" ".padEnd(LEFT_PANEL_WIDTH, ' '));
-        }
-
-        while (leftPanel.length < HEIGHT) {
-            leftPanel.push(" ".repeat(LEFT_PANEL_WIDTH));
-        }
-
-        const RIGHT_PANEL_WIDTH = 25;
-        let rightPanel = [];
-
-        // Отображение управления, если не скрыто
-        if (showControlsToggle) {
-            rightPanel = [
-                "7: НАЛЕВО 9: НАПРАВО".padEnd(RIGHT_PANEL_WIDTH, ' '),
-                "8:ПОВОРОТ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-                "4:УСКОРИТЬ 5:СБРОСИТЬ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-                "1: ПОКАЗАТЬ СЛЕДУЮЩУЮ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-                "0: СТЕРЕТЬ ЭТОТ ТЕКСТ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-                "ПРОБЕЛ - СБРОСИТЬ".padEnd(RIGHT_PANEL_WIDTH, ' '),
-            ];
-        }
-
-        while (rightPanel.length < HEIGHT) {
-            rightPanel.push(" ".repeat(RIGHT_PANEL_WIDTH));
-        }
-
-        const topHeader = ""; 
-        let output = [];
-        
-        if (topHeader.length > 0) {
-            const totalWidth = LEFT_PANEL_WIDTH + WIDTH * FIELD_CELL_EMPTY.length + 1 + RIGHT_PANEL_WIDTH;
-            output.push(" ".repeat(Math.floor((totalWidth - topHeader.length) / 2)) + topHeader);
-        }
-
-        for (let i = 0; i < HEIGHT; i++) {
-            const leftText = leftPanel[i];
-            const rightText = rightPanel[i];
-            let boardLine = " <!";
-
-            for (let cell of tempBoard[i]) {
-                if (cell === 1) boardLine += FIELD_CELL_OCCUPIED;
-                else if (cell === 2) boardLine += FIELD_CELL_ACTIVE;
-                else boardLine += FIELD_CELL_EMPTY;
-            }
-            boardLine += "!>";
-            output.push(`${leftText}${boardLine}${rightText}`);
-        }
-
-        const borderCellLength = FIELD_CELL_EMPTY.length;
-        const bottomBorder1 = " <! " + "=".repeat(WIDTH * borderCellLength - 1) + "!>";
-        const bottomBorder2 = "   " + "\\/\\/".repeat(Math.floor(WIDTH / 2)) + (WIDTH % 2 ? "\\/" : "");
-
-        output.push(" ".repeat(LEFT_PANEL_WIDTH) + bottomBorder1 + " ".repeat(RIGHT_PANEL_WIDTH));
-        output.push(" ".repeat(LEFT_PANEL_WIDTH) + bottomBorder2 + " ".repeat(RIGHT_PANEL_WIDTH));
-
-        document.getElementById('game').textContent = output.join('\n');
-    }
-
-
     window.addEventListener('load', showIntroScreen);
   </script>
 </body>
 </html>
+
