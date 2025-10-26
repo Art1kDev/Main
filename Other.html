@@ -16,15 +16,25 @@
       color: #0f0;
       font-family: 'RetroFont', 'Courier New', monospace;
       margin: 0;
-      padding: 10px;
+      padding: 0;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      user-select: none;
+    }
+    
+    #screen-container {
+      width: 800px;
+      height: 600px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      user-select: none;
+      background: black;
     }
+
     #game, #game-over-menu, #intro {
       white-space: pre;
       line-height: 1.2;
@@ -37,28 +47,34 @@
       padding: 20px;
       line-height: 1.5;
     }
+    #level-input {
+      display: inline;
+    }
   </style>
 </head>
 <body>
-  <pre id="intro" class="hidden">
-[]
-  ТЕТРИС
-                  []
-  </pre>
-  
-  <div id="game-over-menu" class="hidden">
-    <span style="color:#f00; font-weight:bold;">ИГРА ОКОНЧЕНА</span>
-    <br><br>
-    ВАШ УРОВЕНЬ - <span id="final-level">0</span>
-    <br>
-    ИТОГОВЫЙ СЧЕТ: <span id="final-score">0</span>
-    <br>
-    ВСЕГО ЛИНИЙ: <span id="final-lines">0</span>
-    <br><br>
-    НАЖМИТЕ ПРОБЕЛ ДЛЯ ПЕРЕЗАПУСКА
+  <div id="screen-container">
+    <pre id="intro" class="hidden">
+<br><br><br><br>
+  [][] ТЕТРИС [][]
+<br><br><br><br><br>
+ВАШ УРОВЕНЬ? (0-9) <span id="level-input">_</span>
+    </pre>
+    
+    <div id="game-over-menu" class="hidden">
+      <span style="color:#f00; font-weight:bold;">ИГРА ОКОНЧЕНА</span>
+      <br><br>
+      ВАШ УРОВЕНЬ - <span id="final-level">0</span>
+      <br>
+      ИТОГОВЫЙ СЧЕТ: <span id="final-score">0</span>
+      <br>
+      ВСЕГО ЛИНИЙ: <span id="final-lines">0</span>
+      <br><br>
+      НАЖМИТЕ ПРОБЕЛ ДЛЯ ПЕРЕЗАПУСКА
+    </div>
+    
+    <pre id="game" class="hidden"></pre>
   </div>
-  
-  <pre id="game" class="hidden"></pre>
 
   <script>
     const WIDTH = 12;
@@ -77,6 +93,8 @@
     const FIELD_CELL_OCCUPIED = '[]';
     const FIELD_CELL_ACTIVE = '[]';
     const FIELD_CELL_EMPTY = ' .';
+    
+    let gameStartLevel = 0;
 
     function createBoard() {
       return Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
@@ -231,23 +249,34 @@
 
     let lastKey = null;
     document.addEventListener('keydown', (e) => {
-      if (['7', '9', '8', '4', '5', '0', ' ', '1'].includes(e.key)) {
-        lastKey = e.key;
-        e.preventDefault();
-      }
+      const key = e.key;
+      const isDigit = key >= '0' && key <= '9';
+      const isSpace = key === ' ';
       
       const introEl = document.getElementById('intro');
       const menuEl = document.getElementById('game-over-menu');
-      
-      if (!gameRunning && menuEl.classList.contains('hidden') === false && e.key === ' ') {
-        menuEl.classList.add('hidden');
-        introEl.classList.remove('hidden');
-        e.preventDefault();
+      const isMenuVisible = !menuEl.classList.contains('hidden');
+      const isIntroVisible = !introEl.classList.contains('hidden');
+
+      if (isIntroVisible && isDigit) {
+        const level = parseInt(key);
+        if (level >= 0 && level <= 9) {
+          gameStartLevel = level;
+          introEl.classList.add('hidden');
+          main(level);
+          e.preventDefault();
+        }
       }
       
-      if (!gameRunning && introEl.classList.contains('hidden') === false && e.key === ' ') {
-        introEl.classList.add('hidden');
-        main();
+      if (isMenuVisible && isSpace) {
+        menuEl.classList.add('hidden');
+        introEl.classList.remove('hidden');
+        document.getElementById('level-input').textContent = '_';
+        e.preventDefault();
+      }
+
+      if (['7', '9', '8', '4', '5', '0', ' ', '1'].includes(key)) {
+        lastKey = key;
         e.preventDefault();
       }
     });
@@ -300,12 +329,12 @@
     let gameRunning = false;
     let board, current, next, score, totalLinesCleared, fallTime, lastTime, gameLoopId;
 
-    function main() {
+    function main(startLevel) {
       board = createBoard();
       current = newPiece();
       next = newPiece();
       score = 0;
-      totalLinesCleared = 0;
+      totalLinesCleared = startLevel * 10;
       fallTime = 0;
       lastTime = Date.now();
       gameRunning = true;
