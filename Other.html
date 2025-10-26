@@ -2,12 +2,19 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Tetris — Пажитнов А.Л.</title>
+  <title>ТЕТРИС</title>
   <style>
+    @font-face {
+      font-family: 'RetroFont';
+      src: url('Font.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
     body {
       background: black;
       color: #0f0;
-      font-family: 'Courier New', monospace;
+      font-family: 'RetroFont', 'Courier New', monospace;
       margin: 0;
       padding: 10px;
       overflow: hidden;
@@ -18,101 +25,42 @@
       height: 100vh;
       user-select: none;
     }
-    #game {
+    #game, #game-over-menu, #intro {
       white-space: pre;
       line-height: 1.2;
       font-size: 14px;
+      text-align: center;
     }
     .hidden { display: none; }
+    #game-over-menu {
+      border: 1px solid #0f0;
+      padding: 20px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
-  <pre id="intro" class="hidden"></pre>
+  <pre id="intro" class="hidden">
+[]
+  ТЕТРИС
+                  []
+  </pre>
+  
+  <div id="game-over-menu" class="hidden">
+    <span style="color:#f00; font-weight:bold;">ИГРА ОКОНЧЕНА</span>
+    <br><br>
+    ВАШ УРОВЕНЬ - <span id="final-level">0</span>
+    <br>
+    ИТОГОВЫЙ СЧЕТ: <span id="final-score">0</span>
+    <br>
+    ВСЕГО ЛИНИЙ: <span id="final-lines">0</span>
+    <br><br>
+    НАЖМИТЕ ПРОБЕЛ ДЛЯ ПЕРЕЗАПУСКА
+  </div>
+  
   <pre id="game" class="hidden"></pre>
 
   <script>
-    const GREEN_TEXT = '#0f0';
-    const BRIGHT_GREEN_TEXT = '#4f4';
-    const DARK_GREEN_TEXT = '#0a0';
-    const RESET_COLOR = '#0f0';
-
-    let audioContext = null;
-    let isAudioInitialized = false;
-
-    function initAudio() {
-      if (isAudioInitialized) return;
-      try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        isAudioInitialized = true;
-      } catch (e) {}
-    }
-
-    function playTone(freq, durationMs) {
-      if (!isAudioInitialized) initAudio();
-      if (!audioContext || freq === 0) {
-        setTimeout(() => {}, durationMs);
-        return;
-      }
-
-      const sampleRate = audioContext.sampleRate;
-      const numSamples = Math.floor(sampleRate * durationMs / 1000);
-      if (numSamples === 0) return;
-
-      const buffer = audioContext.createBuffer(1, numSamples, sampleRate);
-      const data = buffer.getChannelData(0);
-
-      const amplitude = 0.3;
-      for (let i = 0; i < numSamples; i++) {
-        const timeSec = i / sampleRate;
-        const phase = (timeSec * freq) % 1.0;
-        data[i] = phase < 0.5 ? amplitude : -amplitude;
-      }
-
-      const source = audioContext.createBufferSource();
-      source.buffer = buffer;
-      source.connect(audioContext.destination);
-      source.start();
-      source.stop(audioContext.currentTime + durationMs / 1000);
-    }
-
-    const MS_PER_BEAT = 450;
-    const WHOLE_BEAT = MS_PER_BEAT;
-    const HALF_BEAT = MS_PER_BEAT / 2;
-
-    const melody = [
-      [330, WHOLE_BEAT], [247, HALF_BEAT], [262, HALF_BEAT], [294, WHOLE_BEAT],
-      [262, HALF_BEAT], [247, HALF_BEAT], [220, WHOLE_BEAT], [220, HALF_BEAT],
-      [262, HALF_BEAT], [330, WHOLE_BEAT], [294, HALF_BEAT], [262, HALF_BEAT],
-      [247, WHOLE_BEAT], [247, HALF_BEAT], [262, HALF_BEAT], [294, WHOLE_BEAT],
-      [330, WHOLE_BEAT], [262, WHOLE_BEAT], [220, WHOLE_BEAT], [220, WHOLE_BEAT],
-      [null, 400 * 0.9],
-      [294, WHOLE_BEAT], [349, HALF_BEAT], [440, HALF_BEAT], [440, HALF_BEAT],
-      [392, HALF_BEAT], [349, HALF_BEAT], [330, WHOLE_BEAT], [262, WHOLE_BEAT],
-      [330, WHOLE_BEAT], [294, HALF_BEAT], [262, HALF_BEAT], [247, WHOLE_BEAT],
-      [247, HALF_BEAT], [262, HALF_BEAT], [294, WHOLE_BEAT], [330, WHOLE_BEAT],
-      [262, WHOLE_BEAT], [220, WHOLE_BEAT], [220, WHOLE_BEAT]
-    ];
-
-    let musicIndex = 0;
-    let isMusicPlaying = false;
-
-    function playMusicLoop() {
-      if (!isMusicPlaying) return;
-      const note = melody[musicIndex];
-      if (note[0] === null) {
-        setTimeout(() => {
-          musicIndex = (musicIndex + 1) % melody.length;
-          playMusicLoop();
-        }, note[1]);
-      } else {
-        playTone(note[0], note[1]);
-        setTimeout(() => {
-          musicIndex = (musicIndex + 1) % melody.length;
-          playMusicLoop();
-        }, note[1]);
-      }
-    }
-
     const WIDTH = 12;
     const HEIGHT = 20;
 
@@ -191,7 +139,26 @@
       return newPiece;
     }
 
-    function drawBoard(board, piece, x, y, score, totalLinesCleared) {
+    function drawNextPiece(nextPiece) {
+      const displaySize = 4;
+      let lines = [];
+      const piece = nextPiece.piece;
+
+      for (let r = 0; r < displaySize; r++) {
+        let line = "";
+        for (let c = 0; c < displaySize; c++) {
+          if (r < piece.length && c < piece[r].length && piece[r][c]) {
+            line += FIELD_CELL_ACTIVE;
+          } else {
+            line += FIELD_CELL_EMPTY;
+          }
+        }
+        lines.push(line);
+      }
+      return lines;
+    }
+
+    function drawBoard(board, piece, x, y, score, totalLinesCleared, nextPiece) {
       const level = Math.floor(totalLinesCleared / 10) + 1;
       const tempBoard = board.map(row => [...row]);
 
@@ -207,10 +174,13 @@
         }
       }
 
+      const nextPieceArt = drawNextPiece(nextPiece);
+      const nextPieceTitle = " СЛЕДУЮЩАЯ:";
+
       const leftPanel = [
         `ПОЛНЫХ СТРОК: ${totalLinesCleared}`,
         `УРОВЕНЬ: ${level}`,
-        `СЧЕТ: ${score}`
+        `СЧЕТ: ${score}`,
       ];
 
       const rightPanel = [
@@ -221,21 +191,22 @@
         "1: ПОКАЗАТЬ СЛЕДУЮЩУЮ",
         "0: СТЕРЕТЬ ЭТОТ ТЕКСТ",
         "ПРОБЕЛ - СБРОСИТЬ",
-        "",
-        "--- (Управление) ---",
-        "A / Лево : Влево",
-        "D / Право: Вправо",
-        "W / Вверх: Поворот",
-        "S / Вниз : Сброс (Мягкий)",
-        "Пробел   : Сброс (Жесткий)",
-        "Q        : Выход"
       ];
+      
+      while (leftPanel.length < HEIGHT) {
+        leftPanel.push("");
+      }
 
+      leftPanel[3] = nextPieceTitle;
+      for (let i = 0; i < nextPieceArt.length; i++) {
+        leftPanel[4 + i] = "  " + nextPieceArt[i]; 
+      }
+      
       const panelWidth = 25;
       let output = [];
 
       for (let i = 0; i < HEIGHT; i++) {
-        const leftText = i < leftPanel.length ? leftPanel[i] : "";
+        const leftText = leftPanel[i] || "";
         const rightText = i < rightPanel.length ? rightPanel[i] : "";
         let boardLine = "   <!";
 
@@ -260,8 +231,23 @@
 
     let lastKey = null;
     document.addEventListener('keydown', (e) => {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd', 'q', 'W', 'A', 'S', 'D', 'Q'].includes(e.key)) {
-        lastKey = e.key.toLowerCase();
+      if (['7', '9', '8', '4', '5', '0', ' ', '1'].includes(e.key)) {
+        lastKey = e.key;
+        e.preventDefault();
+      }
+      
+      const introEl = document.getElementById('intro');
+      const menuEl = document.getElementById('game-over-menu');
+      
+      if (!gameRunning && menuEl.classList.contains('hidden') === false && e.key === ' ') {
+        menuEl.classList.add('hidden');
+        introEl.classList.remove('hidden');
+        e.preventDefault();
+      }
+      
+      if (!gameRunning && introEl.classList.contains('hidden') === false && e.key === ' ') {
+        introEl.classList.add('hidden');
+        main();
         e.preventDefault();
       }
     });
@@ -269,76 +255,21 @@
     function getInputValid() {
       const key = lastKey;
       lastKey = null;
-      if (key === ' ') return 'drop';
-      if (key === 'arrowup' || key === 'w') return 'up';
-      if (key === 'arrowleft' || key === 'a') return 'left';
-      if (key === 'arrowright' || key === 'd') return 'right';
-      if (key === 'arrowdown' || key === 's') return 'down';
-      if (key === 'q') return 'quit';
+      if (key === '7') return 'left';
+      if (key === '9') return 'right';
+      if (key === '8') return 'rotate';
+      if (key === '4') return 'down';
+      if (key === '5' || key === ' ') return 'drop';
       return null;
     }
 
     function showIntroScreen() {
-      const introEl = document.getElementById('intro');
-      const gameEl = document.getElementById('game');
-      introEl.classList.remove('hidden');
-      gameEl.classList.add('hidden');
-
-      const originalTetrisArt = [
-        "    ########  ########  ########  ######:    ######    :####:",
-        "    ########  ########  ########  #######    ######   :######",
-        "       ##      ##          ##      ##   :##    ##      ##:  :#",
-        "       ##      ##          ##      ##    ##    ##      ##     ",
-        "       ##      ##          ##      ##   :##    ##      ###:   ",
-        "       ##      #######     ##      #######:    ##      :#####:",
-        "       ##      #######     ##      ######      ##       .#####:",
-        "       ##      ##          ##      ##   ##.    ##         :###",
-        "       ##      ##          ##      ##    ##    ##           ##",
-        "       ##      ##          ##      ##   :##    ##    #:.  :##",
-        "       ##      ########    ##      ##    ##: ######   #######:",
-        "       ##      ########    ##      ##    ### ######   .#####:"
-      ];
-
-      const pazhitnovText = "ИГРА ОТ ПАЖИТНОВА А.Л.";
-      const dateText = "6 ИЮНЯ 1984";
-      const fadeSteps = 30;
-
-      let step = 0;
-      const interval = setInterval(() => {
-        if (step >= fadeSteps) {
-          clearInterval(interval);
-          introEl.classList.add('hidden');
-          return;
-        }
-
-        let currentArt = [];
-        for (let line of originalTetrisArt) {
-          let chars = line.split('');
-          const hashCount = (line.match(/#/g) || []).length;
-          const toFade = Math.floor(hashCount * (step / fadeSteps));
-          let faded = 0;
-          for (let i = 0; i < chars.length && faded < toFade; i++) {
-            if (chars[i] === '#') {
-              chars[i] = ' ';
-              faded++;
-            }
-          }
-          currentArt.push(chars.join(''));
-        }
-
-        let color = GREEN_TEXT;
-        if (step > fadeSteps * 2 / 3) color = DARK_GREEN_TEXT;
-        else if (step > fadeSteps / 3) color = BRIGHT_GREEN_TEXT;
-
-        introEl.innerHTML = currentArt.map(line => `<span style="color:${color}">${line}</span>`).join('<br>') +
-          `<br><span style="color:${color}">${pazhitnovText}</span><br>` +
-          `<span style="color:${color}">${dateText}</span>`;
-
-        step++;
-      }, 50);
+      document.getElementById('game').classList.add('hidden');
+      document.getElementById('game-over-menu').classList.add('hidden');
+      document.getElementById('intro').classList.remove('hidden');
     }
 
-    function fadeInBoard(board, piece, x, y, score, totalLinesCleared) {
+    function fadeInBoard(board, piece, x, y, score, totalLinesCleared, nextPiece) {
       const totalCells = WIDTH * HEIGHT;
       const duration = 1000;
       const startTime = Date.now();
@@ -359,7 +290,7 @@
           }
         }
 
-        drawBoard(currentBoard, piece, x, y, score, totalLinesCleared);
+        drawBoard(currentBoard, piece, x, y, score, totalLinesCleared, nextPiece);
         if (elapsed >= duration) {
           clearInterval(interval);
         }
@@ -370,25 +301,19 @@
     let board, current, next, score, totalLinesCleared, fallTime, lastTime, gameLoopId;
 
     function main() {
-      showIntroScreen();
+      board = createBoard();
+      current = newPiece();
+      next = newPiece();
+      score = 0;
+      totalLinesCleared = 0;
+      fallTime = 0;
+      lastTime = Date.now();
+      gameRunning = true;
+
+      fadeInBoard(board, current.piece, current.x, current.y, score, totalLinesCleared, next);
       setTimeout(() => {
-        isMusicPlaying = true;
-        playMusicLoop();
-
-        board = createBoard();
-        current = newPiece();
-        next = newPiece();
-        score = 0;
-        totalLinesCleared = 0;
-        fallTime = 0;
-        lastTime = Date.now();
-        gameRunning = true;
-
-        fadeInBoard(board, current.piece, current.x, current.y, score, totalLinesCleared);
-        setTimeout(() => {
-          gameLoop();
-        }, 1100);
-      }, 1800);
+        gameLoop();
+      }, 1100);
     }
 
     function gameLoop() {
@@ -404,10 +329,6 @@
       let currentFallSpeed = baseFallSpeed;
 
       const key = getInputValid();
-      if (key === 'quit') {
-        endGame();
-        return;
-      }
 
       if (key === 'left') {
         if (!checkCollision(board, current.piece, current.x - 1, current.y)) {
@@ -417,7 +338,7 @@
         if (!checkCollision(board, current.piece, current.x + 1, current.y)) {
           current.x += 1;
         }
-      } else if (key === 'up') {
+      } else if (key === 'rotate') {
         const rotated = rotatePiece(current.piece);
         if (!checkCollision(board, rotated, current.x, current.y)) {
           current.piece = rotated;
@@ -462,21 +383,28 @@
         }
       }
 
-      drawBoard(board, current.piece, current.x, current.y, score, totalLinesCleared);
+      drawBoard(board, current.piece, current.x, current.y, score, totalLinesCleared, next);
       gameLoopId = requestAnimationFrame(gameLoop);
     }
 
     function endGame() {
       gameRunning = false;
-      isMusicPlaying = false;
       if (gameLoopId) cancelAnimationFrame(gameLoopId);
-      drawBoard(board, current.piece, current.x, current.y, score, totalLinesCleared);
-      alert(`Игра Окончена!\nИтоговый Счет: ${score}\nВсего Линий: ${totalLinesCleared}`);
+      
+      document.getElementById('game').classList.add('hidden');
+      const menuEl = document.getElementById('game-over-menu');
+      
+      const gameLevel = Math.floor(totalLinesCleared / 10) + 1;
+      const finalLevel = Math.min(9, gameLevel) - 1;
+      
+      document.getElementById('final-level').textContent = finalLevel; 
+      document.getElementById('final-score').textContent = score;
+      document.getElementById('final-lines').textContent = totalLinesCleared;
+      
+      menuEl.classList.remove('hidden');
     }
 
-    window.addEventListener('load', () => {
-      main();
-    });
+    window.addEventListener('load', showIntroScreen);
   </script>
 </body>
 </html>
