@@ -43,10 +43,17 @@
             margin: 0;
         }
 
-        .other-link {
+        .links-container {
             position: absolute;
             top: 2vh;
             left: 2vw;
+            display: flex;
+            flex-direction: column;
+            gap: 1vh;
+            text-align: left;
+        }
+
+        .nav-link {
             color: white;
             font-family: 'CustomRFont', sans-serif;
             font-size: 2.5vw;
@@ -54,7 +61,7 @@
             cursor: pointer;
         }
 
-        .other-link:hover {
+        .nav-link:hover {
             color: #ccc;
         }
 
@@ -65,14 +72,18 @@
             .page-logo {
                 max-width: 45%;
             }
-            .other-link {
+            .nav-link {
                 font-size: 3.5vw;
             }
         }
     </style>
 </head>
 <body>
-    <a href="Other.html" class="other-link">Other...</a>
+    <div class="links-container">
+        <a href="Other.html" class="nav-link">Other...</a>
+        <a href="2026.html" class="nav-link">2026 Report</a>
+    </div>
+
     <img src="LogoAR8.png" alt="Ar7 Logo" class="page-logo ar8-logo">
     <img src="LOGOCGP.png" alt="Main Logo" class="page-logo">
 </body>
