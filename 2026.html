@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Countdown</title>
+    <style>
+        @font-face {
+            font-family: 'CustomRFont';
+            src: url('R.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: white;
+            font-family: 'CustomRFont', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        h1 {
+            font-size: 4vw;
+            margin-bottom: 3vh;
+        }
+        #countdown {
+            font-size: 3vw;
+            white-space: pre; 
+        }
+        .back-link {
+            position: absolute;
+            top: 2vh;
+            left: 2vw;
+            color: white;
+            font-family: 'CustomRFont', sans-serif;
+            font-size: 2vw;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #ccc;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 6vw; }
+            #countdown { font-size: 4.5vw; }
+            .back-link { font-size: 4vw; }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">&lt; Назад</a>
+    <h1>ОСТАЛОСЬ ДО 1 ЯНВАРЯ 2026 ГОДА:</h1>
+    <pre id="countdown">Загрузка...</pre>
+
+    <script>
+        const countDownDate = new Date("Jan 1, 2026 00:00:00").getTime();
+        const countdownElement = document.getElementById("countdown");
+
+        const x = setInterval(function() {
+
+            const now = new Date().getTime();
+
+            const distance = countDownDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            countdownElement.innerHTML = 
+                `${days} ДНЕЙ\n` +
+                `${hours} ЧАСОВ\n` +
+                `${minutes} МИНУТ\n` +
+                `${seconds} СЕКУНД`;
+
+            if (distance < 0) {
+                clearInterval(x);
+                countdownElement.innerHTML = "С НОВЫМ ГОДОМ 2026!";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
