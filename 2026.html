@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2026 Countdown</title>
     <style>
         @font-face {
-            font-family: 'CustomRFont';
-            src: url('R.ttf') format('truetype');
+            font-family: 'CustomFFont';
+            src: url('F.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -16,7 +16,7 @@
             padding: 0;
             background-color: black;
             color: white;
-            font-family: 'CustomRFont', sans-serif;
+            font-family: 'CustomFFont', sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -25,19 +25,20 @@
             text-align: center;
         }
         h1 {
-            font-size: 4vw;
-            margin-bottom: 3vh;
+            font-size: 3vw;
+            margin-bottom: 5vh;
+            text-transform: uppercase;
         }
         #countdown {
-            font-size: 3vw;
-            white-space: pre; 
+            font-size: 5vw;
+            letter-spacing: 0.5vw;
         }
         .back-link {
             position: absolute;
             top: 2vh;
             left: 2vw;
             color: white;
-            font-family: 'CustomRFont', sans-serif;
+            font-family: 'CustomFFont', sans-serif;
             font-size: 2vw;
             text-decoration: none;
         }
@@ -46,16 +47,16 @@
         }
 
         @media (max-width: 768px) {
-            h1 { font-size: 6vw; }
-            #countdown { font-size: 4.5vw; }
+            h1 { font-size: 5vw; }
+            #countdown { font-size: 8vw; }
             .back-link { font-size: 4vw; }
         }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">&lt; Назад</a>
-    <h1>ОСТАЛОСЬ ДО 1 ЯНВАРЯ 2026 ГОДА:</h1>
-    <pre id="countdown">Загрузка...</pre>
+    <a href="index.html" class="back-link">&lt; Back</a>
+    <h1>TIME REMAINING UNTIL JANUARY 1, 2026:</h1>
+    <div id="countdown">Loading...</div>
 
     <script>
         const countDownDate = new Date("Jan 1, 2026 00:00:00").getTime();
@@ -68,19 +69,16 @@
             const distance = countDownDate - now;
 
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
 
             countdownElement.innerHTML = 
-                `${days} ДНЕЙ\n` +
-                `${hours} ЧАСОВ\n` +
-                `${minutes} МИНУТ\n` +
-                `${seconds} СЕКУНД`;
+                `${days}:${hours}:${minutes}:${seconds}`;
 
             if (distance < 0) {
                 clearInterval(x);
-                countdownElement.innerHTML = "С НОВЫМ ГОДОМ 2026!";
+                countdownElement.innerHTML = "HAPPY NEW YEAR 2026!";
             }
         }, 1000);
     </script>
