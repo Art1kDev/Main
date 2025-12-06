@@ -12,6 +12,13 @@
             font-style: normal;
         }
 
+        @font-face {
+            font-family: 'TTTFont';
+            src: url('TTT.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -55,7 +62,7 @@
             background-color: black;
             color: white;
             padding: 10px 20px;
-            font-family: 'CustomRFont', sans-serif;
+            font-family: 'TTTFont', sans-serif;
             font-size: 2vw;
             border: 1px solid white;
             cursor: pointer;
@@ -97,8 +104,9 @@
         }
 
         .nav-container:hover .menu-btn {
-            background-color: white;
-            color: black;
+            background-color: black; 
+            color: white;
+            border: 1px solid white;
         }
 
         @media (max-width: 768px) {
@@ -124,11 +132,15 @@
         <div class="menu-btn">Other &#9662;</div>
         <div class="dropdown-content">
             <a href="other.html">TETRIS</a>
-            <a href="2026.html">Осталось до 2026</a>
+            <a href="2026.html">2026</a>
         </div>
     </div>
 
     <img src="LogoAR8.png" alt="Ar7 Logo" class="page-logo ar8-logo">
+    
     <img src="LOGOCGP.png" alt="Main Logo" class="page-logo">
+
+    <img src="Image_0.png" alt="Image 0" class="page-logo">
+
 </body>
 </html>
